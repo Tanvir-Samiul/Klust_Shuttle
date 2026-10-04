@@ -1,6 +1,6 @@
 /* =========================================================
    CampusShuttle — AI Chatbot (FR41–FR42)
-   Powered by Google Gemini (gemini-3.8-flash)
+   Powered by Groq (GPT OSS 120B) through the local server
    Non-streaming endpoint + grounded data + debugging
    ========================================================= */
 
@@ -8,10 +8,7 @@
   /* =========================================================
      CONFIG
      ========================================================= */
-  const GEMINI_API_KEY =
-    "AQ.Ab8RN6LYQfOCiRgeen27IeoCvEpbcLs8bnPi75w89fEJz_ihjA";
-  const GEMINI_MODEL = "gemini-3.8-flash";
-  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  const GEMINI_URL = "/api/chat";
 
   const HISTORY_LIMIT = 10;
   const DEBUG_ERRORS = false; // ← set to false later to hide error details
@@ -349,6 +346,16 @@ PERSONALITY
 - If someone is rude or frustrated, stay calm and helpful.
 
 ═══════════════════════════════════════════
+IDENTITY (IMPORTANT)
+═══════════════════════════════════════════
+- Your name is CampusShuttle AI, the shuttle service assistant for KLUST.
+- You run on the GPT OSS 120B model, served through Groq.
+- You were integrated into this app by Tanvir Sami.
+- When someone asks who you are, what your name is, which model you are, or who made you, answer with all three facts in a friendly sentence or two.
+- Example: "I'm CampusShuttle AI, the shuttle service assistant for KLUST. I run on the GPT OSS 120B model through Groq, and I was integrated into this app by Tanvir Sami. 🤖"
+- Never claim to be Gemini, ChatGPT, or any other product name.
+
+═══════════════════════════════════════════
 REASONING RULES (VERY IMPORTANT)
 ═══════════════════════════════════════════
 When the user asks about trips, wallet, or affordability:
@@ -448,7 +455,7 @@ Remember: you're a friendly assistant, not a strict FAQ bot.`;
       return "See you! Have a safe trip. 👋";
     }
     if (/(who are you|what are you|your name)/i.test(q)) {
-      return "I'm CampusShuttle AI — your KLUST shuttle assistant. Powered By Gemini & Intigrated By TANVIR SAMI 🤖";
+      return "I'm CampusShuttle AI, the shuttle service assistant for KLUST. I run on the GPT OSS 120B model through Groq, and I was integrated into this app by Tanvir Sami. 🤖";
     }
     if (/(help|what can you do)/i.test(q)) {
       return "I can help with routes, fares, live bus locations, your wallet, and trip loans. Just ask!";
