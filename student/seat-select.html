@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reserve a Seat — CampusShuttle</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              navy: {
+                950: "#0A1628",
+                900: "#0F1E37",
+                800: "#16294A",
+                700: "#1F3763",
+              },
+              cream: "#F5F1EA",
+              muted: "#8FA3BF",
+              routeA: "#ef4444",
+              routeB: "#f76d0a",
+              lime: "#41ee22",
+              brown: { 500: "#A9744F", 600: "#8B5E3C", 700: "#6F4728" },
+            },
+            fontFamily: { sans: ["Inter", "system-ui", "sans-serif"] },
+            boxShadow: {
+              glass: "0 20px 60px -20px rgba(0,0,0,0.6)",
+              card: "0 4px 24px -8px rgba(0,0,0,0.4)",
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+
+  <body class="min-h-screen bg-navy-950 font-sans text-cream">
+    <div id="cs-shell">
+      <div id="cs-sidebar"></div>
+
+      <div class="lg:pl-64">
+        <div id="cs-topbar"></div>
+
+        <main class="px-4 sm:px-6 lg:px-10 py-6 lg:py-8 max-w-7xl mx-auto">
+          <!-- Page header -->
+          <div class="mb-6">
+            <p
+              class="text-[10px] uppercase tracking-widest text-routeA font-bold mb-1"
+            >
+              UC08 · Reserve Seat
+            </p>
+            <h1 class="text-2xl sm:text-3xl font-extrabold">
+              Reserve your seat
+            </h1>
+            <p class="text-sm text-muted mt-1">
+              Pick a trip, choose an available seat, and confirm your
+              reservation.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- ============================================
+               LEFT: Trip selection + seat map (2/3)
+               ============================================ -->
+            <div class="lg:col-span-2 space-y-6">
+              <!-- Step 1: Trip picker -->
+              <section
+                class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 sm:p-6 shadow-card"
+              >
+                <div class="flex items-center gap-3 mb-4">
+                  <span
+                    class="w-7 h-7 rounded-full bg-routeA/20 border border-routeA/40 flex items-center justify-center text-xs font-bold text-routeA"
+                    >1</span
+                  >
+                  <h2
+                    class="text-sm font-bold uppercase tracking-widest text-muted"
+                  >
+                    Select a trip
+                  </h2>
+                </div>
+
+                <label
+                  class="block text-[11px] uppercase tracking-widest text-muted font-bold mb-2"
+                  >Route</label
+                >
+                <div
+                  id="routePicker"
+                  class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4"
+                ></div>
+
+                <label
+                  class="block text-[11px] uppercase tracking-widest text-muted font-bold mb-2"
+                  >Departure</label
+                >
+                <div
+                  id="tripPicker"
+                  class="grid grid-cols-1 sm:grid-cols-3 gap-3"
+                ></div>
+              </section>
+
+              <!-- Step 2: Seat map -->
+              <section
+                class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 sm:p-6 shadow-card"
+              >
+                <div class="flex items-center gap-3 mb-4">
+                  <span
+                    class="w-7 h-7 rounded-full bg-routeA/20 border border-routeA/40 flex items-center justify-center text-xs font-bold text-routeA"
+                    >2</span
+                  >
+                  <h2
+                    class="text-sm font-bold uppercase tracking-widest text-muted"
+                  >
+                    Choose a seat
+                  </h2>
+                  <span
+                    id="seatMapSummary"
+                    class="ml-auto text-xs text-muted"
+                  ></span>
+                </div>
+
+                <!-- Legend -->
+                <div class="flex flex-wrap items-center gap-4 mb-5 text-xs">
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="w-4 h-4 rounded-md bg-navy-800 border border-white/20"
+                    ></span
+                    ><span class="text-muted">Available</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-4 h-4 rounded-md bg-routeA"></span
+                    ><span class="text-muted">Reserved (M)</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-4 h-4 rounded-md bg-routeB"></span
+                    ><span class="text-muted">Reserved (F)</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-4 h-4 rounded-md bg-lime"></span
+                    ><span class="text-muted">Your selection</span>
+                  </div>
+                </div>
+
+                <!-- Bus body -->
+                <div class="flex flex-col items-center">
+                  <div
+                    class="w-full max-w-md bg-navy-950/60 border border-white/10 rounded-3xl p-5 relative"
+                  >
+                    <!-- Driver -->
+                    <div class="flex justify-end mb-4">
+                      <div
+                        class="w-10 h-10 rounded-full border-2 border-white/20 flex items-center justify-center text-lg"
+                        title="Driver"
+                      >
+                        🧑‍✈️
+                      </div>
+                    </div>
+                    <!-- Seat grid -->
+                    <div
+                      id="seatGrid"
+                      class="grid grid-cols-5 gap-3 justify-items-center"
+                    ></div>
+                    <!-- Rear -->
+                    <div
+                      class="mt-5 pt-4 border-t border-white/10 text-center text-[10px] uppercase tracking-widest text-muted"
+                    >
+                      Rear Exit
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <!-- ============================================
+               RIGHT: Summary + payment (1/3)
+               ============================================ -->
+            <aside class="lg:col-span-1">
+              <div class="lg:sticky lg:top-24 space-y-4">
+                <!-- Summary card -->
+                <div
+                  class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+                >
+                  <div class="flex items-center gap-3 mb-4">
+                    <span
+                      class="w-7 h-7 rounded-full bg-routeA/20 border border-routeA/40 flex items-center justify-center text-xs font-bold text-routeA"
+                      >3</span
+                    >
+                    <h2
+                      class="text-sm font-bold uppercase tracking-widest text-muted"
+                    >
+                      Confirm
+                    </h2>
+                  </div>
+
+                  <dl class="space-y-3 text-sm">
+                    <div class="flex justify-between gap-3">
+                      <dt class="text-muted">Route</dt>
+                      <dd
+                        id="sumRoute"
+                        class="font-semibold text-cream text-right"
+                      >
+                        —
+                      </dd>
+                    </div>
+                    <div class="flex justify-between gap-3">
+                      <dt class="text-muted">Departure</dt>
+                      <dd
+                        id="sumDepart"
+                        class="font-semibold text-cream text-right"
+                      >
+                        —
+                      </dd>
+                    </div>
+                    <div class="flex justify-between gap-3">
+                      <dt class="text-muted">Seat</dt>
+                      <dd
+                        id="sumSeat"
+                        class="font-semibold text-cream text-right"
+                      >
+                        —
+                      </dd>
+                    </div>
+                    <div
+                      class="flex justify-between gap-3 pt-3 border-t border-white/10"
+                    >
+                      <dt class="text-muted">Fare</dt>
+                      <dd id="sumFare" class="font-bold text-cream text-right">
+                        RM —
+                      </dd>
+                    </div>
+                  </dl>
+
+                  <!-- Wallet -->
+                  <div
+                    class="mt-5 p-4 rounded-xl bg-white/5 border border-white/10"
+                  >
+                    <div class="flex items-center justify-between mb-2">
+                      <span
+                        class="text-[10px] uppercase tracking-widest text-muted font-bold"
+                        >Shuttle Wallet</span
+                      >
+                      <span>👛</span>
+                    </div>
+                    <p
+                      id="walletBalance"
+                      class="text-lg font-extrabold text-cream"
+                    >
+                      RM —
+                    </p>
+                    <p id="walletNote" class="text-[11px] text-muted mt-1">—</p>
+                  </div>
+
+                  <!-- Error / info -->
+                  <div
+                    id="errorBox"
+                    class="hidden mt-4 text-sm text-[#F5C2B6] bg-[#3A1F1B]/60 border border-[#E07A5F]/40 rounded-xl px-3 py-2.5"
+                  ></div>
+
+                  <!-- Submit -->
+                  <button
+                    id="confirmBtn"
+                    disabled
+                    class="mt-5 w-full py-3.5 rounded-xl bg-gradient-to-br from-routeA to-routeB text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition"
+                  >
+                    Confirm reservation
+                  </button>
+                </div>
+
+                <!-- Loan info (only when applicable) -->
+                <div
+                  id="loanBox"
+                  class="hidden bg-navy-900/60 border border-routeB/30 rounded-2xl p-5 shadow-card"
+                >
+                  <p
+                    class="text-[10px] uppercase tracking-widest text-routeB font-bold mb-2"
+                  >
+                    Trip Loan Available
+                  </p>
+                  <p class="text-xs text-muted leading-relaxed">
+                    Your balance is short. You can use a trip loan to cover up
+                    to
+                    <span class="text-cream font-semibold"
+                      >3 consecutive trips</span
+                    >. The borrowed amount will be deducted from your next
+                    wallet top-up.
+                  </p>
+                  <div class="mt-3 flex items-center justify-between text-xs">
+                    <span class="text-muted">Loan after this trip</span>
+                    <span id="loanCount" class="font-semibold text-cream"
+                      >0 / 3</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- ============================================
+       Success modal
+       ============================================ -->
+    <div
+      id="successModal"
+      class="hidden fixed inset-0 z-50 items-center justify-center p-4"
+    >
+      <div
+        class="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        data-close
+      ></div>
+      <div
+        class="relative w-full max-w-sm bg-navy-900 border border-white/10 rounded-3xl p-6 shadow-glass animate-card-in"
+      >
+        <div
+          class="w-14 h-14 rounded-full bg-lime/15 border border-lime/40 flex items-center justify-center mx-auto text-2xl text-lime"
+        >
+          ✓
+        </div>
+        <h3 class="mt-4 text-center text-lg font-extrabold">
+          Reservation confirmed
+        </h3>
+        <p class="mt-1 text-center text-xs text-muted">
+          Your seat has been locked in. A boarding pass is now available on your
+          dashboard.
+        </p>
+
+        <div
+          class="mt-5 p-4 rounded-xl bg-white/5 border border-white/10 text-sm space-y-2"
+        >
+          <div class="flex justify-between">
+            <span class="text-muted">Route</span
+            ><span id="okRoute" class="font-semibold text-cream text-right"
+              >—</span
+            >
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted">Seat</span
+            ><span id="okSeat" class="font-semibold text-cream">—</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted">Fare</span
+            ><span id="okFare" class="font-semibold text-cream">—</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted">New balance</span
+            ><span id="okBalance" class="font-semibold text-cream">—</span>
+          </div>
+        </div>
+
+        <div class="mt-5 flex gap-2">
+          <a
+            href="dashboard.html"
+            class="flex-1 text-center py-3 rounded-xl bg-gradient-to-br from-routeA to-routeB text-white font-semibold text-sm hover:opacity-90 transition"
+            >Back to dashboard</a
+          >
+          <button
+            data-close
+            class="px-4 py-3 rounded-xl border border-white/15 text-cream font-semibold text-sm hover:bg-white/5 transition"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/js/data.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/layout.js"></script>
+    <script src="../assets/js/seat-select.js"></script>
+  </body>
+</html>

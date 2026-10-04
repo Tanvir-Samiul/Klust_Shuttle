@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Track Bus — CampusShuttle</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              navy: {
+                950: "#0A1628",
+                900: "#0F1E37",
+                800: "#16294A",
+                700: "#1F3763",
+              },
+              cream: "#F5F1EA",
+              muted: "#8FA3BF",
+              routeA: "#ef4444",
+              routeB: "#f76d0a",
+              lime: "#41ee22",
+              brown: { 500: "#A9744F", 600: "#8B5E3C", 700: "#6F4728" },
+            },
+            fontFamily: { sans: ["Inter", "system-ui", "sans-serif"] },
+            boxShadow: {
+              glass: "0 20px 60px -20px rgba(0,0,0,0.6)",
+              card: "0 4px 24px -8px rgba(0,0,0,0.4)",
+            },
+          },
+        },
+      };
+    </script>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+
+  <body class="min-h-screen bg-navy-950 font-sans text-cream">
+    <div id="cs-shell">
+      <div id="cs-sidebar"></div>
+
+      <div class="lg:pl-64">
+        <div id="cs-topbar"></div>
+
+        <main class="px-4 sm:px-6 lg:px-8 py-6">
+          <!-- Page header -->
+          <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p
+                class="text-[10px] uppercase tracking-widest text-lime font-bold mb-1"
+              >
+                FR09–FR11 · Live Tracking
+              </p>
+              <h1 class="text-2xl sm:text-3xl font-extrabold">
+                Track the shuttle
+              </h1>
+              <p class="text-sm text-muted mt-1">
+                Live GPS position, traffic, and ETA to your stop.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span
+                class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-lime/10 border border-lime/30 text-xs font-semibold text-lime"
+              >
+                <span class="relative flex w-2 h-2">
+                  <span
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime opacity-75"
+                  ></span>
+                  <span
+                    class="relative inline-flex rounded-full h-2 w-2 bg-lime"
+                  ></span>
+                </span>
+                Live
+              </span>
+              <span id="lastUpdated" class="text-[11px] text-muted"
+                >Updated just now</span
+              >
+            </div>
+          </div>
+
+          <!-- Route switcher -->
+          <div class="mb-5">
+            <div
+              id="routeTabs"
+              class="inline-flex flex-wrap gap-2 p-1 rounded-2xl bg-navy-900/60 border border-white/10 backdrop-blur"
+            >
+              <!-- Filled by tracking.js -->
+            </div>
+          </div>
+
+          <!-- Main grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-5">
+            <!-- Map panel -->
+            <div class="lg:col-span-3 relative">
+              <div
+                class="relative rounded-2xl overflow-hidden border border-white/10 bg-navy-900/60 shadow-card"
+                style="height: 640px"
+              >
+                <div id="map" class="absolute inset-0"></div>
+
+                <!-- Floating: legend (bottom-right) -->
+                <div
+                  class="absolute bottom-4 right-4 z-[500] bg-navy-950/85 backdrop-blur-xl border border-white/15 rounded-xl p-3 text-[11px]"
+                >
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <span
+                      class="w-3 h-3 rounded-full"
+                      style="background: #ef4444; box-shadow: 0 0 8px #ef4444"
+                    ></span>
+                    <span class="text-muted">Route A · Serdang</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="w-3 h-3 rounded-full"
+                      style="background: #f76d0a; box-shadow: 0 0 8px #f76d0a"
+                    ></span>
+                    <span class="text-muted">Route B · IOI City</span>
+                  </div>
+                </div>
+
+                <!-- Floating: recenter (top-right) -->
+                <button
+                  id="recenterBtn"
+                  class="absolute top-4 right-4 z-[500] w-10 h-10 rounded-xl bg-navy-950/85 backdrop-blur-xl border border-white/15 flex items-center justify-center text-cream hover:bg-navy-900 transition"
+                  title="Recenter"
+                >
+                  🎯
+                </button>
+              </div>
+            </div>
+
+            <!-- Side panel -->
+            <aside class="lg:col-span-1 space-y-4">
+              <!-- Trip summary + live stats -->
+              <div
+                class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+              >
+                <p
+                  class="text-[10px] uppercase tracking-widest text-muted font-bold mb-3"
+                >
+                  Current Trip
+                </p>
+                <p id="tripRoute" class="text-sm font-bold text-cream">—</p>
+                <p id="tripVehicle" class="text-[11px] text-muted mt-1">—</p>
+
+                <div class="mt-4 grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <p
+                      class="text-[10px] uppercase tracking-widest text-muted font-bold"
+                    >
+                      Departed
+                    </p>
+                    <p id="tripDeparted" class="mt-1 font-semibold text-cream">
+                      —
+                    </p>
+                  </div>
+                  <div>
+                    <p
+                      class="text-[10px] uppercase tracking-widest text-muted font-bold"
+                    >
+                      ETA final
+                    </p>
+                    <p id="tripEtaFinal" class="mt-1 font-semibold text-cream">
+                      —
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Live stats -->
+                <div
+                  class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between"
+                >
+                  <div>
+                    <p
+                      class="text-[10px] uppercase tracking-widest text-muted font-bold"
+                    >
+                      Now running
+                    </p>
+                    <p
+                      id="busName"
+                      class="text-sm font-extrabold text-cream mt-0.5"
+                    >
+                      BUS-07
+                    </p>
+                  </div>
+                  <div
+                    id="busBadge"
+                    class="w-9 h-9 rounded-xl flex items-center justify-center text-base"
+                  >
+                    🚌
+                  </div>
+                </div>
+
+                <div class="mt-3 space-y-2 text-xs">
+                  <div class="flex items-center justify-between">
+                    <span class="text-muted">Next stop</span>
+                    <span
+                      id="nextStop"
+                      class="font-semibold text-cream text-right"
+                      >—</span
+                    >
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-muted">ETA</span>
+                    <span
+                      id="etaValue"
+                      class="font-semibold text-lime text-right"
+                      >—</span
+                    >
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-muted">Speed</span>
+                    <span
+                      id="speedValue"
+                      class="font-semibold text-cream text-right"
+                      >—</span
+                    >
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-muted">Occupancy</span>
+                    <span
+                      id="occupancyValue"
+                      class="font-semibold text-cream text-right"
+                      >—</span
+                    >
+                  </div>
+                </div>
+
+                <div class="mt-3 pt-3 border-t border-white/10">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span
+                      class="text-[10px] uppercase tracking-widest text-muted font-bold"
+                      >Progress</span
+                    >
+                  </div>
+                  <div class="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                    <div
+                      id="progressBar"
+                      class="h-full transition-all duration-300"
+                      style="
+                        width: 0%;
+                        background: linear-gradient(90deg, #ef4444, #f76d0a);
+                      "
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Stops list -->
+              <div
+                class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+              >
+                <p
+                  class="text-[10px] uppercase tracking-widest text-muted font-bold mb-3"
+                >
+                  Stops along the way
+                </p>
+                <div id="stopsList" class="space-y-3"></div>
+              </div>
+
+              <!-- Info -->
+              <div
+                class="bg-routeB/10 border border-routeB/30 rounded-2xl p-4 text-[11px] text-cream/90 leading-relaxed"
+              >
+                <p class="font-semibold text-routeB mb-1">ℹ️ How it works</p>
+                Live location updates every
+                <span class="font-bold">5 seconds</span> (NFR-07). ETA is
+                recalculated using real traffic data (FR11).
+              </div>
+            </aside>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script src="../assets/js/data.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/layout.js"></script>
+    <script src="../assets/js/tracking.js"></script>
+  </body>
+</html>

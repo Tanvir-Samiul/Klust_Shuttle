@@ -1,0 +1,307 @@
+/* =========================================================
+   CampusShuttle — custom styles (v5)
+   Dark tiles, POIs, labels, clean bus, per-label colors
+   ========================================================= */
+
+/* ---------- Leaflet container ---------- */
+.leaflet-container {
+  background: #0a1628 !important;
+  font-family: inherit;
+  outline: none;
+}
+.leaflet-control-container {
+  display: none !important;
+}
+.leaflet-pane {
+  z-index: 1 !important;
+}
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 1 !important;
+}
+
+/* Stadia Alidade Dark already navy — brightness bumped per request */
+.leaflet-tile-pane {
+  filter: brightness(1.95) contrast(1.05) saturate(1) hue-rotate(190deg);
+}
+
+/* ---------- Markers ---------- */
+.cs-marker {
+  background: transparent;
+  border: none;
+}
+
+.cs-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+}
+
+.cs-poi {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(245, 241, 234, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.cs-stop {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0a1628;
+  border: 2px solid #c9a227;
+}
+
+.cs-hub {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #c9a227;
+  border: 3px solid #fff;
+  box-shadow: 0 0 16px rgba(201, 162, 39, 0.7);
+}
+.cs-hub::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid #c9a227;
+  animation: hubPulse 2.4s ease-out infinite;
+}
+@keyframes hubPulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Standard label — color is inherited from inline style when set */
+.cs-label {
+  background: rgba(15, 30, 55, 0.92);
+  color: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Small / POI label — keeps muted cream regardless of inline color */
+.cs-label-sm {
+  font-size: 9px;
+  font-weight: 500;
+  padding: 1px 6px;
+  background: rgba(15, 30, 55, 0.65);
+  color: rgba(245, 241, 234, 0.75);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Bus ---------- */
+.cs-bus {
+  background: transparent;
+  border: none;
+}
+
+.cs-bus-marker {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  will-change: transform;
+}
+.cs-bus-marker svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* ---------- Entrance animations ---------- */
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-card-in {
+  animation: cardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes staggerIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.stagger-item {
+  opacity: 0;
+  animation: staggerIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.stagger-item:nth-child(1) {
+  animation-delay: 0.15s;
+}
+.stagger-item:nth-child(2) {
+  animation-delay: 0.25s;
+}
+.stagger-item:nth-child(3) {
+  animation-delay: 0.35s;
+}
+.stagger-item:nth-child(4) {
+  animation-delay: 0.45s;
+}
+.stagger-item:nth-child(5) {
+  animation-delay: 0.55s;
+}
+.stagger-item:nth-child(6) {
+  animation-delay: 0.65s;
+}
+.stagger-item:nth-child(7) {
+  animation-delay: 0.75s;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+.animate-shake {
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.fade-out-page {
+  animation: fadeOut 0.4s ease-out forwards;
+}
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: rippleAnim 0.6s linear;
+  background: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+@keyframes rippleAnim {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #7fb77e, #5c9a5c) !important;
+}
+
+section::-webkit-scrollbar {
+  width: 6px;
+}
+section::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-in,
+  .stagger-item,
+  .cs-hub::after {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
+/* =========================================================
+   Shell / dashboard additions
+   ========================================================= */
+
+/* Ensure content doesn't jitter when sidebar opens on mobile */
+body {
+  overflow-x: hidden;
+}
+
+/* Smooth focus ring for keyboard navigation */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid #f76d0a;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Card hover polish */
+.shadow-card {
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+.shadow-card:hover {
+  transform: translateY(-1px);
+}
+
+/* Custom scrollbar for sidebar nav */
+#cs-sidebarInner nav::-webkit-scrollbar {
+  width: 4px;
+}
+#cs-sidebarInner nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
+/* =========================================================
+   Seat map — reserved-seat styling
+   ========================================================= */
+
+.seat {
+  font-family: "Inter", sans-serif;
+  outline: none;
+}
+.seat:not([disabled]):active {
+  transform: scale(0.95);
+}
+
+/* Better focus ring for keyboard nav */
+.seat:focus-visible {
+  outline: 2px solid #f76d0a;
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   Modal container — needed because we use `hidden` + `flex`
+   ========================================================= */
+#successModal.flex {
+  display: flex;
+}

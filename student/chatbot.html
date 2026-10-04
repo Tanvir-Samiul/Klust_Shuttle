@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatbot — CampusShuttle</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              navy: {
+                950: "#0A1628",
+                900: "#0F1E37",
+                800: "#16294A",
+                700: "#1F3763",
+              },
+              cream: "#F5F1EA",
+              muted: "#8FA3BF",
+              routeA: "#ef4444",
+              routeB: "#f76d0a",
+              lime: "#41ee22",
+              brown: { 500: "#A9744F", 600: "#8B5E3C", 700: "#6F4728" },
+            },
+            fontFamily: { sans: ["Inter", "system-ui", "sans-serif"] },
+            boxShadow: {
+              glass: "0 20px 60px -20px rgba(0,0,0,0.6)",
+              card: "0 4px 24px -8px rgba(0,0,0,0.4)",
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+
+  <body class="min-h-screen bg-navy-950 font-sans text-cream">
+    <div id="cs-shell">
+      <div id="cs-sidebar"></div>
+
+      <div class="lg:pl-64">
+        <div id="cs-topbar"></div>
+
+        <main class="px-4 sm:px-6 lg:px-8 py-6">
+          <!-- Page header -->
+          <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p
+                class="text-[10px] uppercase tracking-widest text-routeB font-bold mb-1"
+              >
+                FR41–FR42 · AI Assistant
+              </p>
+              <h1 class="text-2xl sm:text-3xl font-extrabold">
+                Ask CampusShuttle
+              </h1>
+              <p class="text-sm text-muted mt-1">
+                Powered by Gemini. Ask about routes, schedules, fares, wallet,
+                and more.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span
+                class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-lime/10 border border-lime/30 text-xs font-semibold text-lime"
+              >
+                <span class="relative flex w-2 h-2">
+                  <span
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime opacity-75"
+                  ></span>
+                  <span
+                    class="relative inline-flex rounded-full h-2 w-2 bg-lime"
+                  ></span>
+                </span>
+                Online
+              </span>
+              <button
+                id="clearChat"
+                class="text-[11px] text-muted hover:text-routeA transition"
+              >
+                Clear chat
+              </button>
+            </div>
+          </div>
+
+          <!-- Main grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-5">
+            <!-- Chat panel (3/4) -->
+            <div class="lg:col-span-3">
+              <div
+                class="bg-navy-900/60 border border-white/10 rounded-2xl shadow-card flex flex-col overflow-hidden"
+                style="height: 640px"
+              >
+                <!-- Chat header -->
+                <div
+                  class="px-5 py-4 border-b border-white/10 flex items-center gap-3"
+                >
+                  <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-routeA to-routeB flex items-center justify-center text-lg"
+                  >
+                    🤖
+                  </div>
+                  <div>
+                    <p class="font-bold text-cream text-sm">CampusShuttle AI</p>
+                    <p class="text-[11px] text-muted">
+                      Powered by Gemini · responds in seconds
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Messages -->
+                <div
+                  id="chatMessages"
+                  class="flex-1 overflow-y-auto px-5 py-5 space-y-4 scroll-smooth"
+                >
+                  <!-- Welcome message injected by JS -->
+                </div>
+
+                <!-- Suggested chips -->
+                <div
+                  id="suggestedChips"
+                  class="px-5 pb-3 flex gap-2 overflow-x-auto flex-nowrap whitespace-nowrap"
+                >
+                  <!-- Injected by JS -->
+                </div>
+
+                <!-- Input bar -->
+                <div class="px-5 py-4 border-t border-white/10 bg-navy-950/40">
+                  <form id="chatForm" class="flex items-end gap-2">
+                    <textarea
+                      id="chatInput"
+                      rows="1"
+                      placeholder="Ask about routes, fares, or your wallet…"
+                      class="flex-1 resize-none bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-cream placeholder:text-muted focus:outline-none focus:border-routeB/60 focus:ring-2 focus:ring-routeB/20 transition max-h-32"
+                    ></textarea>
+                    <button
+                      type="submit"
+                      id="sendBtn"
+                      class="w-11 h-11 rounded-xl bg-gradient-to-br from-routeA to-routeB flex items-center justify-center text-white hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                      title="Send"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="w-5 h-5"
+                      >
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                      </svg>
+                    </button>
+                  </form>
+                  <p class="mt-2 text-[10px] text-muted text-center">
+                    Responses are AI-generated. Verify important info.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sidebar (1/4) -->
+            <aside class="lg:col-span-1 space-y-4">
+              <!-- Suggested topics -->
+              <div
+                class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+              >
+                <p
+                  class="text-[10px] uppercase tracking-widest text-muted font-bold mb-3"
+                >
+                  Suggested topics
+                </p>
+                <div class="space-y-2">
+                  <button
+                    data-q="When is the next bus?"
+                    class="topic-btn w-full text-left text-xs px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-routeB/40 hover:bg-white/10 transition"
+                  >
+                    🚌 Next bus departure
+                  </button>
+                  <button
+                    data-q="How much is the fare?"
+                    class="topic-btn w-full text-left text-xs px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-routeB/40 hover:bg-white/10 transition"
+                  >
+                    💰 Route fare
+                  </button>
+                  <button
+                    data-q="Where is the bus right now?"
+                    class="topic-btn w-full text-left text-xs px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-routeB/40 hover:bg-white/10 transition"
+                  >
+                    📍 Live bus location
+                  </button>
+                  <button
+                    data-q="Can I get a trip loan?"
+                    class="topic-btn w-full text-left text-xs px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-routeB/40 hover:bg-white/10 transition"
+                  >
+                    📄 Trip loan eligibility
+                  </button>
+                  <button
+                    data-q="What are the available routes?"
+                    class="topic-btn w-full text-left text-xs px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-routeB/40 hover:bg-white/10 transition"
+                  >
+                    🗺️ All routes
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quick links -->
+              <div
+                class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+              >
+                <p
+                  class="text-[10px] uppercase tracking-widest text-muted font-bold mb-3"
+                >
+                  Quick links
+                </p>
+                <div class="space-y-1.5 text-xs">
+                  <a
+                    href="seat-select.html"
+                    class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/5 transition"
+                  >
+                    <span class="text-muted">💺 Reserve a seat</span
+                    ><span class="text-muted">→</span>
+                  </a>
+                  <a
+                    href="wallet.html"
+                    class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/5 transition"
+                  >
+                    <span class="text-muted">👛 My wallet</span
+                    ><span class="text-muted">→</span>
+                  </a>
+                  <a
+                    href="tracking.html"
+                    class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/5 transition"
+                  >
+                    <span class="text-muted">📍 Track bus</span
+                    ><span class="text-muted">→</span>
+                  </a>
+                </div>
+              </div>
+
+              <!-- Info -->
+              <div
+                class="bg-routeB/10 border border-routeB/30 rounded-2xl p-4 text-[11px] text-cream/90 leading-relaxed"
+              >
+                <p class="font-semibold text-routeB mb-1">ℹ️ How it works</p>
+                Your question is sent to
+                <span class="font-bold">Gemini</span> with real shuttle data
+                (routes, schedules, fares) attached as context. Replies appear
+                word-by-word.
+              </div>
+            </aside>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script src="../assets/js/data.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/layout.js"></script>
+    <script src="../assets/js/chatbot.js"></script>
+  </body>
+</html>

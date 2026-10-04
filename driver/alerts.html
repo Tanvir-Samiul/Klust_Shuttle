@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alert History — CampusShuttle Driver</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              navy: {
+                950: "#0A1628",
+                900: "#0F1E37",
+                800: "#16294A",
+                700: "#1F3763",
+              },
+              cream: "#F5F1EA",
+              muted: "#8FA3BF",
+              routeA: "#ef4444",
+              routeB: "#f76d0a",
+              lime: "#41ee22",
+              brown: { 500: "#A9744F", 600: "#8B5E3C", 700: "#6F4728" },
+            },
+            fontFamily: { sans: ["Inter", "system-ui", "sans-serif"] },
+            boxShadow: {
+              glass: "0 20px 60px -20px rgba(0,0,0,0.6)",
+              card: "0 4px 24px -8px rgba(0,0,0,0.4)",
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+
+  <body class="min-h-screen bg-navy-950 font-sans text-cream">
+    <div id="cs-shell">
+      <div id="cs-sidebar"></div>
+
+      <div class="lg:pl-64">
+        <div id="cs-topbar"></div>
+
+        <main class="px-4 sm:px-6 lg:px-10 py-6 lg:py-8 max-w-6xl mx-auto">
+          <!-- Page header -->
+          <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p
+                class="text-[10px] uppercase tracking-widest text-routeA font-bold mb-1"
+              >
+                UC12 · Alert Log
+              </p>
+              <h1 class="text-2xl sm:text-3xl font-extrabold">Alert History</h1>
+              <p class="text-sm text-muted mt-1">
+                Every delay and SOS alert you've sent, with delivery status.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span id="alertCount" class="text-xs text-muted"></span>
+              <button
+                id="clearAlertsBtn"
+                class="text-[11px] text-muted hover:text-routeA transition font-semibold"
+              >
+                Clear all
+              </button>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="mb-5 flex flex-wrap items-center gap-2">
+            <button
+              data-filter="all"
+              class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold border border-routeB/40 bg-routeB/10 text-cream"
+            >
+              All
+            </button>
+            <button
+              data-filter="sos"
+              class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 bg-white/5 text-muted hover:text-cream transition"
+            >
+              🚨 SOS
+            </button>
+            <button
+              data-filter="delay"
+              class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 bg-white/5 text-muted hover:text-cream transition"
+            >
+              ⏰ Delays
+            </button>
+            <button
+              data-filter="queued"
+              class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 bg-white/5 text-muted hover:text-cream transition"
+            >
+              ⏳ Queued
+            </button>
+          </div>
+
+          <!-- Stats row -->
+          <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div
+              class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+            >
+              <p
+                class="text-[10px] uppercase tracking-widest text-muted font-bold"
+              >
+                Total Alerts
+              </p>
+              <p id="statTotal" class="mt-2 text-2xl font-extrabold text-cream">
+                —
+              </p>
+            </div>
+            <div
+              class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+            >
+              <p
+                class="text-[10px] uppercase tracking-widest text-muted font-bold"
+              >
+                SOS Sent
+              </p>
+              <p id="statSos" class="mt-2 text-2xl font-extrabold text-routeA">
+                —
+              </p>
+            </div>
+            <div
+              class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+            >
+              <p
+                class="text-[10px] uppercase tracking-widest text-muted font-bold"
+              >
+                Delays Sent
+              </p>
+              <p
+                id="statDelay"
+                class="mt-2 text-2xl font-extrabold text-routeB"
+              >
+                —
+              </p>
+            </div>
+            <div
+              class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+            >
+              <p
+                class="text-[10px] uppercase tracking-widest text-muted font-bold"
+              >
+                Students Notified
+              </p>
+              <p
+                id="statRecipients"
+                class="mt-2 text-2xl font-extrabold text-lime"
+              >
+                —
+              </p>
+            </div>
+          </section>
+
+          <!-- Alert list -->
+          <section
+            class="bg-navy-900/60 border border-white/10 rounded-2xl shadow-card overflow-hidden"
+          >
+            <div class="px-5 sm:px-6 py-4 border-b border-white/10">
+              <h2
+                class="text-sm font-bold uppercase tracking-widest text-muted"
+              >
+                All Alerts
+              </h2>
+            </div>
+            <div id="alertsList" class="divide-y divide-white/5"></div>
+          </section>
+
+          <!-- Info -->
+          <div
+            class="mt-6 bg-routeB/10 border border-routeB/30 rounded-2xl p-4 text-[11px] text-cream/90 leading-relaxed"
+          >
+            <p class="font-semibold text-routeB mb-1">ℹ️ How this works</p>
+            Every alert you send from <span class="font-bold">My Trip</span> is
+            logged here for admin review (UC12 postcondition). Alerts sent while
+            offline are <span class="font-bold">queued</span> and delivered
+            automatically once connectivity returns (E2).
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script src="../assets/js/data.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/layout.js"></script>
+    <script src="../assets/js/driver-alerts.js"></script>
+  </body>
+</html>

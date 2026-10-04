@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Wallet — CampusShuttle</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              navy: {
+                950: "#0A1628",
+                900: "#0F1E37",
+                800: "#16294A",
+                700: "#1F3763",
+              },
+              cream: "#F5F1EA",
+              muted: "#8FA3BF",
+              routeA: "#ef4444",
+              routeB: "#f76d0a",
+              lime: "#41ee22",
+              brown: { 500: "#A9744F", 600: "#8B5E3C", 700: "#6F4728" },
+            },
+            fontFamily: { sans: ["Inter", "system-ui", "sans-serif"] },
+            boxShadow: {
+              glass: "0 20px 60px -20px rgba(0,0,0,0.6)",
+              card: "0 4px 24px -8px rgba(0,0,0,0.4)",
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+
+  <body class="min-h-screen bg-navy-950 font-sans text-cream">
+    <div id="cs-shell">
+      <div id="cs-sidebar"></div>
+
+      <div class="lg:pl-64">
+        <div id="cs-topbar"></div>
+
+        <main class="px-4 sm:px-6 lg:px-10 py-6 lg:py-8 max-w-7xl mx-auto">
+          <!-- Page header -->
+          <div class="mb-6">
+            <p
+              class="text-[10px] uppercase tracking-widest text-routeB font-bold mb-1"
+            >
+              FR19 · Shuttle Wallet
+            </p>
+            <h1 class="text-2xl sm:text-3xl font-extrabold">My Wallet</h1>
+            <p class="text-sm text-muted mt-1">
+              Top up your balance, track your trip loan, and review
+              transactions.
+            </p>
+          </div>
+
+          <!-- Top row: Balance + Loan -->
+          <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mb-8">
+            <!-- Balance card -->
+            <div
+              class="lg:col-span-2 relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-navy-900/90 to-navy-800/60 p-6 sm:p-8 shadow-card"
+            >
+              <div
+                class="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-routeB/10 blur-3xl"
+              ></div>
+              <div
+                class="absolute -bottom-24 -left-16 w-72 h-72 rounded-full bg-routeA/10 blur-3xl"
+              ></div>
+
+              <div class="relative">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <p
+                      class="text-[10px] uppercase tracking-widest text-muted font-bold"
+                    >
+                      Available Balance
+                    </p>
+                    <p
+                      id="walletBalanceBig"
+                      class="mt-3 text-4xl sm:text-5xl font-extrabold tracking-tight text-cream"
+                    >
+                      RM —
+                    </p>
+                    <p class="text-xs text-muted mt-2">Last updated just now</p>
+                  </div>
+                  <div
+                    class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl"
+                  >
+                    👛
+                  </div>
+                </div>
+
+                <div class="mt-8 flex flex-wrap gap-3">
+                  <button
+                    id="openTopupBtn"
+                    class="px-5 py-3 rounded-xl bg-gradient-to-br from-routeB to-brown-600 text-white font-semibold text-sm hover:opacity-90 transition"
+                  >
+                    Top up wallet
+                  </button>
+                  <a
+                    href="seat-select.html"
+                    class="px-5 py-3 rounded-xl border border-white/15 text-cream font-semibold text-sm hover:bg-white/5 transition"
+                  >
+                    Reserve a seat
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Loan card -->
+            <div
+              class="rounded-2xl border border-white/10 bg-navy-900/60 p-6 shadow-card"
+            >
+              <div class="flex items-center justify-between mb-3">
+                <p
+                  class="text-[10px] uppercase tracking-widest text-muted font-bold"
+                >
+                  Trip Loan
+                </p>
+                <span class="text-lg">📄</span>
+              </div>
+
+              <p
+                id="loanOutstanding"
+                class="text-2xl font-extrabold text-cream"
+              >
+                RM 0.00
+              </p>
+              <p class="text-[11px] text-muted mt-1">Outstanding balance</p>
+
+              <div class="mt-5">
+                <div
+                  class="flex justify-between text-[10px] uppercase tracking-widest text-muted font-bold mb-2"
+                >
+                  <span>Loan cycle</span>
+                  <span id="loanCycleText">0 / 3 trips</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-white/5 overflow-hidden">
+                  <div
+                    id="loanProgressBar"
+                    class="h-full bg-gradient-to-r from-routeB to-routeA transition-all"
+                    style="width: 0%"
+                  ></div>
+                </div>
+              </div>
+
+              <p
+                id="loanNote"
+                class="mt-4 text-[11px] text-muted leading-relaxed"
+              >
+                You can borrow for up to 3 consecutive trips. The amount is
+                auto-deducted on your next top-up.
+              </p>
+            </div>
+          </section>
+
+          <!-- Stats -->
+          <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div
+              class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+            >
+              <p
+                class="text-[10px] uppercase tracking-widest text-muted font-bold"
+              >
+                Spent this month
+              </p>
+              <p id="statSpent" class="mt-2 text-xl font-extrabold text-cream">
+                RM —
+              </p>
+            </div>
+            <div
+              class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+            >
+              <p
+                class="text-[10px] uppercase tracking-widest text-muted font-bold"
+              >
+                Trips taken
+              </p>
+              <p id="statTrips" class="mt-2 text-xl font-extrabold text-cream">
+                —
+              </p>
+            </div>
+            <div
+              class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+            >
+              <p
+                class="text-[10px] uppercase tracking-widest text-muted font-bold"
+              >
+                Loan repaid
+              </p>
+              <p id="statRepaid" class="mt-2 text-xl font-extrabold text-cream">
+                RM —
+              </p>
+            </div>
+            <div
+              class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+            >
+              <p
+                class="text-[10px] uppercase tracking-widest text-muted font-bold"
+              >
+                Top-ups
+              </p>
+              <p id="statTopups" class="mt-2 text-xl font-extrabold text-cream">
+                —
+              </p>
+            </div>
+          </section>
+
+          <!-- Transactions -->
+          <section
+            class="bg-navy-900/60 border border-white/10 rounded-2xl shadow-card overflow-hidden"
+          >
+            <div
+              class="px-5 sm:px-6 py-5 border-b border-white/10 flex items-center justify-between"
+            >
+              <div>
+                <h2
+                  class="text-sm font-bold uppercase tracking-widest text-muted"
+                >
+                  Transaction History
+                </h2>
+                <p class="text-[11px] text-muted mt-1">
+                  All wallet activity, newest first
+                </p>
+              </div>
+              <div
+                id="txFilter"
+                class="hidden sm:flex items-center gap-1 p-1 rounded-xl bg-white/5 border border-white/10"
+              >
+                <button
+                  data-filter="all"
+                  class="tx-filter px-3 py-1.5 text-xs font-semibold rounded-lg"
+                >
+                  All
+                </button>
+                <button
+                  data-filter="topup"
+                  class="tx-filter px-3 py-1.5 text-xs font-semibold rounded-lg"
+                >
+                  Top-ups
+                </button>
+                <button
+                  data-filter="fare"
+                  class="tx-filter px-3 py-1.5 text-xs font-semibold rounded-lg"
+                >
+                  Fares
+                </button>
+                <button
+                  data-filter="loan"
+                  class="tx-filter px-3 py-1.5 text-xs font-semibold rounded-lg"
+                >
+                  Loans
+                </button>
+              </div>
+            </div>
+            <div id="txList" class="divide-y divide-white/5"></div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <!-- ============================================
+       Top-Up Modal
+       ============================================ -->
+    <div
+      id="topupModal"
+      class="hidden fixed inset-0 z-50 items-center justify-center p-4"
+    >
+      <div
+        class="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        data-close
+      ></div>
+      <div
+        class="relative w-full max-w-md bg-navy-900 border border-white/10 rounded-3xl p-6 shadow-glass animate-card-in"
+      >
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <p
+              class="text-[10px] uppercase tracking-widest text-routeB font-bold"
+            >
+              Top Up Wallet
+            </p>
+            <h3 class="text-lg font-extrabold mt-1">Add funds</h3>
+          </div>
+          <button
+            data-close
+            class="text-muted hover:text-cream text-2xl leading-none"
+          >
+            ×
+          </button>
+        </div>
+
+        <p
+          class="text-[11px] uppercase tracking-widest text-muted font-bold mb-2"
+        >
+          Quick amounts
+        </p>
+        <div class="grid grid-cols-4 gap-2 mb-5">
+          <button
+            data-amount="10"
+            class="amount-btn py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-semibold hover:border-white/30 transition"
+          >
+            RM 10
+          </button>
+          <button
+            data-amount="20"
+            class="amount-btn py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-semibold hover:border-white/30 transition"
+          >
+            RM 20
+          </button>
+          <button
+            data-amount="50"
+            class="amount-btn py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-semibold hover:border-white/30 transition"
+          >
+            RM 50
+          </button>
+          <button
+            data-amount="100"
+            class="amount-btn py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-semibold hover:border-white/30 transition"
+          >
+            RM 100
+          </button>
+        </div>
+
+        <label
+          class="block text-[11px] uppercase tracking-widest text-muted font-bold mb-2"
+          >Or enter custom amount</label
+        >
+        <div class="relative mb-5">
+          <span
+            class="absolute left-4 top-1/2 -translate-y-1/2 text-muted text-sm font-semibold"
+            >RM</span
+          >
+          <input
+            id="customAmount"
+            type="number"
+            min="1"
+            step="1"
+            placeholder="0.00"
+            class="w-full pl-12 pr-4 py-3 rounded-xl bg-navy-950/60 border border-white/10 text-cream text-sm focus:outline-none focus:border-routeB/60 focus:ring-2 focus:ring-routeB/20 transition"
+          />
+        </div>
+
+        <p
+          class="text-[11px] uppercase tracking-widest text-muted font-bold mb-2"
+        >
+          Payment method
+        </p>
+        <div class="space-y-2 mb-5">
+          <label
+            class="flex items-center gap-3 px-4 py-3 rounded-xl border border-white/10 bg-white/5 hover:border-white/20 cursor-pointer transition"
+          >
+            <input
+              type="radio"
+              name="pm"
+              value="Touch n Go"
+              checked
+              class="accent-routeB"
+            />
+            <span class="text-sm font-semibold">Touch 'n Go eWallet</span>
+          </label>
+          <label
+            class="flex items-center gap-3 px-4 py-3 rounded-xl border border-white/10 bg-white/5 hover:border-white/20 cursor-pointer transition"
+          >
+            <input
+              type="radio"
+              name="pm"
+              value="DuitNow"
+              class="accent-routeB"
+            />
+            <span class="text-sm font-semibold">DuitNow QR</span>
+          </label>
+          <label
+            class="flex items-center gap-3 px-4 py-3 rounded-xl border border-white/10 bg-white/5 hover:border-white/20 cursor-pointer transition"
+          >
+            <input
+              type="radio"
+              name="pm"
+              value="Online Banking"
+              class="accent-routeB"
+            />
+            <span class="text-sm font-semibold">Online Banking (FPX)</span>
+          </label>
+        </div>
+
+        <div
+          id="loanRepayNotice"
+          class="hidden mb-5 px-4 py-3 rounded-xl bg-routeB/10 border border-routeB/30 text-xs text-cream/90 leading-relaxed"
+        >
+          You have an outstanding loan of
+          <span id="repayAmount" class="font-bold text-routeB">RM 0.00</span>.
+          It will be deducted automatically from this top-up (FR26).
+        </div>
+
+        <div
+          id="topupError"
+          class="hidden mb-4 text-sm text-[#F5C2B6] bg-[#3A1F1B]/60 border border-[#E07A5F]/40 rounded-xl px-3 py-2.5"
+        ></div>
+
+        <button
+          id="confirmTopup"
+          disabled
+          class="w-full py-3.5 rounded-xl bg-gradient-to-br from-routeB to-brown-600 text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition"
+        >
+          Confirm top-up
+        </button>
+
+        <p class="mt-3 text-[10px] text-center text-muted">
+          Simulated transaction. No real payment is processed.
+        </p>
+      </div>
+    </div>
+
+    <!-- ============================================
+       TnG Simulated App Overlay
+       ============================================ -->
+    <div
+      id="tngOverlay"
+      class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4"
+    >
+      <div class="absolute inset-0 bg-black/85 backdrop-blur-md"></div>
+
+      <div
+        class="relative w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl animate-card-in"
+        style="background: #0064d2"
+      >
+        <div
+          class="px-6 pt-6 pb-8 relative"
+          style="background: linear-gradient(135deg, #0064d2 0%, #00aeef 100%)"
+        >
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-2">
+              <div
+                class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-[10px] font-black"
+                style="color: #0064d2"
+              >
+                TnG
+              </div>
+              <span class="text-white font-bold text-sm"
+                >Touch 'n Go eWallet</span
+              >
+            </div>
+            <button
+              id="tngClose"
+              class="text-white/70 hover:text-white text-2xl leading-none"
+            >
+              ×
+            </button>
+          </div>
+
+          <p
+            class="text-white/70 text-[11px] uppercase tracking-widest font-bold"
+          >
+            Amount
+          </p>
+          <p id="tngAmount" class="text-white text-4xl font-extrabold mt-1">
+            RM 20.00
+          </p>
+
+          <p
+            class="text-white/70 text-[11px] uppercase tracking-widest font-bold mt-4"
+          >
+            Merchant
+          </p>
+          <p class="text-white text-sm font-semibold mt-0.5">
+            KLUST CampusShuttle
+          </p>
+        </div>
+
+        <div class="bg-white rounded-t-3xl px-6 py-6 -mt-4 relative">
+          <div id="tngStepForm">
+            <label
+              class="block text-[11px] uppercase tracking-widest text-gray-500 font-bold mb-2"
+              >Mobile number</label
+            >
+            <input
+              id="tngPhone"
+              type="tel"
+              value="012-3456789"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-[#0064D2] focus:ring-2 focus:ring-[#0064D2]/20 transition"
+            />
+
+            <label
+              class="block text-[11px] uppercase tracking-widest text-gray-500 font-bold mb-2 mt-4"
+              >6-digit PIN</label
+            >
+            <input
+              id="tngPin"
+              type="password"
+              inputmode="numeric"
+              maxlength="6"
+              placeholder="• • • • • •"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-900 text-lg tracking-[0.4em] text-center font-bold focus:outline-none focus:border-[#0064D2] focus:ring-2 focus:ring-[#0064D2]/20 transition"
+            />
+
+            <div
+              id="tngError"
+              class="hidden mt-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2"
+            ></div>
+
+            <button
+              id="tngPayBtn"
+              disabled
+              class="mt-5 w-full py-3.5 rounded-xl font-bold text-white text-sm disabled:opacity-40 disabled:cursor-not-allowed transition"
+              style="background: #0064d2"
+            >
+              Pay RM 20.00
+            </button>
+          </div>
+
+          <div id="tngStepProcessing" class="hidden text-center py-8">
+            <div
+              class="w-14 h-14 mx-auto rounded-full border-4 border-[#0064D2]/20 border-t-[#0064D2] animate-spin"
+            ></div>
+            <p class="mt-4 text-sm font-semibold text-gray-700">
+              Processing payment…
+            </p>
+            <p class="text-xs text-gray-400 mt-1">
+              Please do not close this window
+            </p>
+          </div>
+
+          <div id="tngStepSuccess" class="hidden text-center py-8">
+            <div
+              class="w-16 h-16 mx-auto rounded-full bg-green-100 flex items-center justify-center"
+            >
+              <span class="text-3xl text-green-600">✓</span>
+            </div>
+            <p class="mt-4 text-base font-extrabold text-gray-900">
+              Payment successful
+            </p>
+            <p id="tngSuccessAmount" class="text-sm text-gray-500 mt-1">
+              RM 20.00
+            </p>
+            <p class="text-[11px] text-gray-400 mt-3">
+              Returning to CampusShuttle…
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-white px-6 pb-6 pt-2 text-center">
+          <p class="text-[10px] text-gray-400">
+            Protected by Touch 'n Go eWallet · Simulated
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================
+       DuitNow QR Simulated Overlay
+       ============================================ -->
+    <div
+      id="duitnowOverlay"
+      class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4"
+    >
+      <div class="absolute inset-0 bg-black/85 backdrop-blur-md"></div>
+
+      <div
+        class="relative w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl animate-card-in"
+        style="background: #ffffff"
+      >
+        <div
+          class="px-6 py-5 flex items-center justify-between border-b border-gray-100"
+        >
+          <div class="flex items-center gap-2">
+            <div
+              class="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black text-white"
+              style="background: #d6273a"
+            >
+              DN
+            </div>
+            <span class="text-gray-900 font-bold text-sm">DuitNow QR</span>
+          </div>
+          <button
+            id="duitnowClose"
+            class="text-gray-400 hover:text-gray-800 text-2xl leading-none"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="px-6 py-6 text-center">
+          <p
+            class="text-[11px] uppercase tracking-widest text-gray-500 font-bold"
+          >
+            Pay to
+          </p>
+          <p class="text-gray-900 font-bold text-sm mt-0.5">
+            KLUST CampusShuttle
+          </p>
+
+          <p
+            id="duitnowAmount"
+            class="mt-4 text-3xl font-extrabold text-gray-900"
+          >
+            RM 20.00
+          </p>
+
+          <div
+            id="qrBox"
+            class="mt-5 mx-auto w-52 h-52 bg-white rounded-2xl border-2 border-gray-200 flex items-center justify-center relative overflow-hidden"
+          >
+            <div
+              id="qrGrid"
+              class="absolute inset-3 grid grid-cols-8 grid-rows-8 gap-0.5"
+            ></div>
+          </div>
+
+          <div
+            class="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500"
+          >
+            <span class="relative flex w-2 h-2">
+              <span
+                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"
+              ></span>
+              <span
+                class="relative inline-flex rounded-full h-2 w-2 bg-red-500"
+              ></span>
+            </span>
+            Waiting for you to scan…
+          </div>
+
+          <button
+            id="duitnowSimulate"
+            class="mt-5 w-full py-3 rounded-xl text-white font-bold text-sm transition"
+            style="background: #d6273a"
+          >
+            Simulate scan
+          </button>
+          <p class="text-[10px] text-gray-400 mt-3">
+            In a real app, the payment auto-confirms once you scan with your
+            bank.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================
+       FPX Online Banking Simulated Overlay
+       ============================================ -->
+    <div
+      id="fpxOverlay"
+      class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4"
+    >
+      <div class="absolute inset-0 bg-black/85 backdrop-blur-md"></div>
+
+      <div
+        class="relative w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl animate-card-in bg-white"
+      >
+        <!-- Header -->
+        <div
+          class="px-6 py-5 flex items-center justify-between border-b border-gray-100"
+          style="background: #f4f4f6"
+        >
+          <div class="flex items-center gap-2">
+            <div
+              class="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black text-white"
+              style="background: #1a2e4a"
+            >
+              FPX
+            </div>
+            <span class="text-gray-900 font-bold text-sm">Online Banking</span>
+          </div>
+          <button
+            id="fpxClose"
+            class="text-gray-400 hover:text-gray-800 text-2xl leading-none"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="px-6 py-6" style="background: #ffffff">
+          <!-- Step: bank + login -->
+          <div id="fpxStepLogin">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <p
+                  class="text-[11px] uppercase tracking-widest text-gray-500 font-bold"
+                >
+                  Pay to
+                </p>
+                <p class="text-gray-900 font-bold text-sm mt-0.5">
+                  KLUST CampusShuttle
+                </p>
+              </div>
+              <div class="text-right">
+                <p
+                  class="text-[11px] uppercase tracking-widest text-gray-500 font-bold"
+                >
+                  Amount
+                </p>
+                <p id="fpxAmount" class="text-gray-900 font-extrabold text-lg">
+                  RM 20.00
+                </p>
+              </div>
+            </div>
+
+            <p
+              class="text-[11px] uppercase tracking-widest text-gray-500 font-bold mb-2"
+            >
+              Choose your bank
+            </p>
+            <div class="grid grid-cols-2 gap-2 mb-5">
+              <button
+                data-bank="Maybank"
+                class="bank-btn py-3 rounded-xl border-2 border-gray-200 text-xs font-bold transition"
+                style="color: #1a1a1a"
+              >
+                Maybank
+              </button>
+              <button
+                data-bank="CIMB"
+                class="bank-btn py-3 rounded-xl border-2 border-gray-200 text-xs font-bold transition"
+                style="color: #ec1c24"
+              >
+                CIMB
+              </button>
+              <button
+                data-bank="RHB"
+                class="bank-btn py-3 rounded-xl border-2 border-gray-200 text-xs font-bold transition"
+                style="color: #005baa"
+              >
+                RHB
+              </button>
+              <button
+                data-bank="Public Bank"
+                class="bank-btn py-3 rounded-xl border-2 border-gray-200 text-xs font-bold transition"
+                style="color: #e60012"
+              >
+                Public Bank
+              </button>
+            </div>
+
+            <label
+              class="block text-[11px] uppercase tracking-widest text-gray-500 font-bold mb-2"
+              >Username</label
+            >
+            <input
+              id="fpxUser"
+              type="text"
+              value="demo_user"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-[#1A2E4A] focus:ring-2 focus:ring-[#1A2E4A]/20 transition"
+            />
+
+            <label
+              class="block text-[11px] uppercase tracking-widest text-gray-500 font-bold mb-2 mt-4"
+              >Password</label
+            >
+            <input
+              id="fpxPass"
+              type="password"
+              value="demo1234"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-[#1A2E4A] focus:ring-2 focus:ring-[#1A2E4A]/20 transition"
+            />
+
+            <div
+              id="fpxError"
+              class="hidden mt-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2"
+            ></div>
+
+            <button
+              id="fpxLoginBtn"
+              disabled
+              class="mt-5 w-full py-3.5 rounded-xl font-bold text-white text-sm disabled:opacity-40 disabled:cursor-not-allowed transition"
+              style="background: #1a2e4a"
+            >
+              Log in
+            </button>
+          </div>
+
+          <!-- Step: TAC -->
+          <div id="fpxStepTac" class="hidden">
+            <p class="text-xs text-gray-500 leading-relaxed">
+              A 6-digit TAC has been sent to your registered mobile number.
+            </p>
+
+            <label
+              class="block text-[11px] uppercase tracking-widest text-gray-500 font-bold mb-2 mt-4"
+              >TAC</label
+            >
+            <input
+              id="fpxTac"
+              type="text"
+              inputmode="numeric"
+              maxlength="6"
+              placeholder="• • • • • •"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-900 text-lg tracking-[0.4em] text-center font-bold focus:outline-none focus:border-[#1A2E4A] focus:ring-2 focus:ring-[#1A2E4A]/20 transition"
+            />
+
+            <div
+              id="fpxTacError"
+              class="hidden mt-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2"
+            ></div>
+
+            <button
+              id="fpxPayBtn"
+              disabled
+              class="mt-5 w-full py-3.5 rounded-xl font-bold text-white text-sm disabled:opacity-40 disabled:cursor-not-allowed transition"
+              style="background: #1a2e4a"
+            >
+              Pay RM 20.00
+            </button>
+          </div>
+
+          <!-- Step: processing -->
+          <div id="fpxStepProcessing" class="hidden text-center py-8">
+            <div
+              class="w-14 h-14 mx-auto rounded-full border-4 border-[#1A2E4A]/20 border-t-[#1A2E4A] animate-spin"
+            ></div>
+            <p class="mt-4 text-sm font-semibold text-gray-700">Verifying…</p>
+          </div>
+
+          <!-- Step: success -->
+          <div id="fpxStepSuccess" class="hidden text-center py-8">
+            <div
+              class="w-16 h-16 mx-auto rounded-full bg-green-100 flex items-center justify-center"
+            >
+              <span class="text-3xl text-green-600">✓</span>
+            </div>
+            <p class="mt-4 text-base font-extrabold text-gray-900">
+              Payment successful
+            </p>
+            <p id="fpxSuccessAmount" class="text-sm text-gray-500 mt-1">
+              RM 20.00
+            </p>
+            <p class="text-[11px] text-gray-400 mt-3">
+              Returning to CampusShuttle…
+            </p>
+          </div>
+        </div>
+
+        <div class="px-6 pb-6 text-center" style="background: #f4f4f6">
+          <p class="text-[10px] text-gray-400">
+            Financial Process Exchange (FPX) · Simulated
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div
+      id="toast"
+      class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[70]"
+    >
+      <div
+        class="px-5 py-3 rounded-2xl bg-navy-900 border border-lime/40 shadow-glass flex items-center gap-3"
+      >
+        <span
+          class="w-6 h-6 rounded-full bg-lime/20 text-lime flex items-center justify-center text-sm"
+          >✓</span
+        >
+        <span id="toastText" class="text-sm font-semibold text-cream"
+          >Top-up successful</span
+        >
+      </div>
+    </div>
+
+    <script src="../assets/js/data.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/layout.js"></script>
+    <script src="../assets/js/wallet.js"></script>
+  </body>
+</html>
