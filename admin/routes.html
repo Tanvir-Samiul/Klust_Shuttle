@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Routes & Analytics — CampusShuttle Admin</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              navy: {
+                950: "#0A1628",
+                900: "#0F1E37",
+                800: "#16294A",
+                700: "#1F3763",
+              },
+              cream: "#F5F1EA",
+              muted: "#8FA3BF",
+              routeA: "#ef4444",
+              routeB: "#f76d0a",
+              lime: "#41ee22",
+              brown: { 500: "#A9744F", 600: "#8B5E3C", 700: "#6F4728" },
+            },
+            fontFamily: { sans: ["Inter", "system-ui", "sans-serif"] },
+            boxShadow: {
+              glass: "0 20px 60px -20px rgba(0,0,0,0.6)",
+              card: "0 4px 24px -8px rgba(0,0,0,0.4)",
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+
+  <body class="min-h-screen bg-navy-950 font-sans text-cream">
+    <div id="cs-shell">
+      <div id="cs-sidebar"></div>
+
+      <div class="lg:pl-64">
+        <div id="cs-topbar"></div>
+
+        <main class="px-4 sm:px-6 lg:px-10 py-6 lg:py-8 max-w-7xl mx-auto">
+          <!-- Page header -->
+          <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p
+                class="text-[10px] uppercase tracking-widest text-routeB font-bold mb-1"
+              >
+                UC04 · Administrator
+              </p>
+              <h1 class="text-2xl sm:text-3xl font-extrabold">
+                Routes & Analytics
+              </h1>
+              <p class="text-sm text-muted mt-1">
+                Manage shuttle routes, schedules, and view ridership analytics.
+              </p>
+            </div>
+
+            <button
+              id="addRouteBtn"
+              class="px-5 py-3 rounded-xl bg-gradient-to-br from-routeA to-routeB text-white font-semibold text-sm hover:opacity-90 transition"
+            >
+              + Add Route
+            </button>
+          </div>
+
+          <!-- Tabs -->
+          <div
+            class="mb-6 inline-flex gap-2 p-1 rounded-2xl bg-navy-900/60 border border-white/10 backdrop-blur"
+          >
+            <button
+              data-tab="routes"
+              class="tab-btn px-5 py-2.5 rounded-xl text-xs font-semibold bg-gradient-to-br from-routeB/25 to-routeA/15 text-cream border border-routeB/30"
+            >
+              🗺️ Routes
+            </button>
+            <button
+              data-tab="analytics"
+              class="tab-btn px-5 py-2.5 rounded-xl text-xs font-semibold text-muted hover:text-cream transition"
+            >
+              📊 Analytics
+            </button>
+          </div>
+
+          <!-- ============================================
+               TAB: Routes
+               ============================================ -->
+          <section id="tab-routes" class="space-y-4">
+            <!-- Filters -->
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <button
+                data-filter="all"
+                class="route-filter px-3 py-1.5 rounded-full text-[11px] font-semibold border border-routeB/40 bg-routeB/10 text-cream"
+              >
+                All Routes
+              </button>
+              <button
+                data-filter="active"
+                class="route-filter px-3 py-1.5 rounded-full text-[11px] font-semibold border border-white/10 bg-white/5 text-muted hover:text-cream transition"
+              >
+                Active
+              </button>
+              <button
+                data-filter="inactive"
+                class="route-filter px-3 py-1.5 rounded-full text-[11px] font-semibold border border-white/10 bg-white/5 text-muted hover:text-cream transition"
+              >
+                Inactive
+              </button>
+              <span id="routeCount" class="ml-auto text-xs text-muted"></span>
+            </div>
+
+            <!-- Route list -->
+            <div id="routesList" class="space-y-3"></div>
+          </section>
+
+          <!-- ============================================
+               TAB: Analytics
+               ============================================ -->
+          <section id="tab-analytics" class="hidden space-y-5">
+            <!-- KPIs -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div
+                class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+              >
+                <p
+                  class="text-[10px] uppercase tracking-widest text-muted font-bold"
+                >
+                  Total Trips
+                </p>
+                <p
+                  id="kpiTrips"
+                  class="mt-2 text-2xl font-extrabold text-cream"
+                >
+                  —
+                </p>
+                <p class="text-[10px] text-muted mt-1">Last 7 days</p>
+              </div>
+              <div
+                class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+              >
+                <p
+                  class="text-[10px] uppercase tracking-widest text-muted font-bold"
+                >
+                  Passengers
+                </p>
+                <p
+                  id="kpiPassengers"
+                  class="mt-2 text-2xl font-extrabold text-cream"
+                >
+                  —
+                </p>
+                <p class="text-[10px] text-muted mt-1">Last 7 days</p>
+              </div>
+              <div
+                class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+              >
+                <p
+                  class="text-[10px] uppercase tracking-widest text-muted font-bold"
+                >
+                  Avg Load Factor
+                </p>
+                <p id="kpiLoad" class="mt-2 text-2xl font-extrabold text-lime">
+                  —
+                </p>
+                <p class="text-[10px] text-muted mt-1">
+                  Seats used vs capacity
+                </p>
+              </div>
+              <div
+                class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 shadow-card"
+              >
+                <p
+                  class="text-[10px] uppercase tracking-widest text-muted font-bold"
+                >
+                  On-time Rate
+                </p>
+                <p
+                  id="kpiOntime"
+                  class="mt-2 text-2xl font-extrabold text-cream"
+                >
+                  —
+                </p>
+                <p class="text-[10px] text-muted mt-1">Trips within 5 min</p>
+              </div>
+            </div>
+
+            <!-- Peak hours chart -->
+            <div
+              class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 sm:p-6 shadow-card"
+            >
+              <div class="flex items-center justify-between mb-5">
+                <div>
+                  <h2
+                    class="text-sm font-bold uppercase tracking-widest text-muted"
+                  >
+                    Peak Hour Demand
+                  </h2>
+                  <p class="text-[11px] text-muted mt-1">
+                    Passengers per hour, last 7 days
+                  </p>
+                </div>
+                <span
+                  id="peakBadge"
+                  class="text-[10px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full bg-routeA/15 border border-routeA/40 text-routeA"
+                >
+                  —
+                </span>
+              </div>
+              <div id="peakChart" class="flex items-end gap-1.5 h-44"></div>
+              <div
+                id="peakLabels"
+                class="flex items-center gap-1.5 mt-2 text-[9px] text-muted"
+              ></div>
+            </div>
+
+            <!-- Route load + congestion -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <!-- Route load -->
+              <div
+                class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 sm:p-6 shadow-card"
+              >
+                <h2
+                  class="text-sm font-bold uppercase tracking-widest text-muted mb-4"
+                >
+                  Route Load
+                </h2>
+                <div id="routeLoadList" class="space-y-3"></div>
+              </div>
+
+              <!-- Congestion -->
+              <div
+                class="bg-navy-900/60 border border-white/10 rounded-2xl p-5 sm:p-6 shadow-card"
+              >
+                <h2
+                  class="text-sm font-bold uppercase tracking-widest text-muted mb-4"
+                >
+                  Congestion Points
+                </h2>
+                <div id="congestionList" class="space-y-3"></div>
+              </div>
+            </div>
+
+            <!-- E2 info banner -->
+            <div
+              id="analyticsInfo"
+              class="hidden bg-routeB/10 border border-routeB/30 rounded-2xl p-4 text-[11px] text-cream/90 leading-relaxed"
+            >
+              <p class="font-semibold text-routeB mb-1">
+                ℹ️ Data still building
+              </p>
+              Not enough completed trips in the selected window to show reliable
+              analytics. Analytics will become more accurate as more trips are
+              recorded (E2).
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <!-- ============================================
+         Add / Edit Route Modal
+         ============================================ -->
+    <div
+      id="routeModal"
+      class="modal-root hidden fixed inset-0 z-50 items-center justify-center p-4"
+    >
+      <div
+        class="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        data-close
+      ></div>
+      <div
+        class="relative w-full max-w-lg bg-navy-900 border border-white/10 rounded-3xl p-6 shadow-glass animate-card-in max-h-[90vh] overflow-y-auto"
+      >
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <p
+              class="text-[10px] uppercase tracking-widest text-routeB font-bold"
+            >
+              Route
+            </p>
+            <h3 id="routeModalTitle" class="text-lg font-extrabold mt-1">
+              Add New Route
+            </h3>
+          </div>
+          <button
+            data-close
+            class="text-muted hover:text-cream text-2xl leading-none"
+          >
+            ×
+          </button>
+        </div>
+
+        <form id="routeForm" class="space-y-4" novalidate>
+          <div>
+            <label
+              class="block text-[11px] uppercase tracking-widest text-muted font-bold mb-2"
+              >Route ID</label
+            >
+            <input
+              id="fRouteId"
+              type="text"
+              maxlength="4"
+              placeholder="e.g. C"
+              class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-cream placeholder:text-muted focus:outline-none focus:border-routeB/60 transition"
+            />
+          </div>
+
+          <div>
+            <label
+              class="block text-[11px] uppercase tracking-widest text-muted font-bold mb-2"
+              >Route Name</label
+            >
+            <input
+              id="fRouteName"
+              type="text"
+              placeholder="e.g. KLUST → Putrajaya Sentral"
+              class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-cream placeholder:text-muted focus:outline-none focus:border-routeB/60 transition"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                class="block text-[11px] uppercase tracking-widest text-muted font-bold mb-2"
+                >Fare (RM)</label
+              >
+              <input
+                id="fRouteFare"
+                type="number"
+                step="0.10"
+                min="0"
+                placeholder="2.50"
+                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-cream placeholder:text-muted focus:outline-none focus:border-routeB/60 transition"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-[11px] uppercase tracking-widest text-muted font-bold mb-2"
+                >Duration (min)</label
+              >
+              <input
+                id="fRouteDuration"
+                type="number"
+                min="5"
+                placeholder="20"
+                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-cream placeholder:text-muted focus:outline-none focus:border-routeB/60 transition"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              class="block text-[11px] uppercase tracking-widest text-muted font-bold mb-2"
+              >Assigned Bus</label
+            >
+            <select
+              id="fRouteVehicle"
+              class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-cream focus:outline-none focus:border-routeB/60 transition"
+            >
+              <option value="">— Select —</option>
+            </select>
+          </div>
+
+          <div>
+            <label
+              class="block text-[11px] uppercase tracking-widest text-muted font-bold mb-2"
+              >Departure Times (comma-separated)</label
+            >
+            <input
+              id="fRouteSchedules"
+              type="text"
+              placeholder="e.g. 09:00, 14:30, 18:00"
+              class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-cream placeholder:text-muted focus:outline-none focus:border-routeB/60 transition"
+            />
+          </div>
+
+          <div
+            id="routeFormError"
+            class="hidden text-sm text-[#F5C2B6] bg-[#3A1F1B]/60 border border-[#E07A5F]/40 rounded-xl px-3 py-2.5"
+          ></div>
+
+          <div class="flex gap-2 pt-2">
+            <button
+              type="button"
+              data-close
+              class="flex-1 py-3 rounded-xl border border-white/15 text-cream font-semibold text-sm hover:bg-white/5 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              id="routeSaveBtn"
+              class="flex-1 py-3 rounded-xl bg-gradient-to-br from-routeA to-routeB text-white font-bold text-sm hover:opacity-90 transition"
+            >
+              Save Route
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ============================================
+         Delete Confirmation Modal (E3 — delete blocked)
+         ============================================ -->
+    <div
+      id="deleteModal"
+      class="modal-root hidden fixed inset-0 z-50 items-center justify-center p-4"
+    >
+      <div
+        class="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        data-close
+      ></div>
+      <div
+        class="relative w-full max-w-sm bg-navy-900 border border-routeA/40 rounded-3xl p-6 shadow-glass animate-card-in"
+      >
+        <div
+          class="w-14 h-14 rounded-full bg-routeA/15 border border-routeA/50 flex items-center justify-center mx-auto text-2xl"
+        >
+          ⚠️
+        </div>
+        <h3 id="deleteTitle" class="mt-4 text-center text-lg font-extrabold">
+          Delete Route?
+        </h3>
+        <p
+          id="deleteBody"
+          class="mt-2 text-center text-xs text-muted leading-relaxed"
+        >
+          This action cannot be undone.
+        </p>
+
+        <div class="mt-5 flex gap-2">
+          <button
+            data-close
+            class="flex-1 py-3 rounded-xl border border-white/15 text-cream font-semibold text-sm hover:bg-white/5 transition"
+          >
+            Cancel
+          </button>
+          <button
+            id="deleteConfirmBtn"
+            class="flex-1 py-3 rounded-xl bg-gradient-to-br from-routeA to-[#b91c1c] text-white font-bold text-sm hover:opacity-90 transition"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div
+      id="toast"
+      class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[70]"
+    >
+      <div
+        class="px-5 py-3 rounded-2xl bg-navy-900 border border-lime/40 shadow-glass flex items-center gap-3"
+      >
+        <span
+          class="w-6 h-6 rounded-full bg-lime/20 text-lime flex items-center justify-center text-sm"
+          >✓</span
+        >
+        <span id="toastText" class="text-sm font-semibold text-cream"
+          >Done</span
+        >
+      </div>
+    </div>
+
+    <script src="../assets/js/data.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/layout.js"></script>
+    <script src="../assets/js/admin-routes.js"></script>
+  </body>
+</html>

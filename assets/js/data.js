@@ -735,3 +735,107 @@ window.CS_ALERTS = [
     status: "delivered",
   },
 ];
+/* =========================================================
+   Admin / UC04 — Manage Routes & Analytics
+   Mock data: routes, vehicles, analytics, schedule grid
+   ========================================================= */
+
+window.CS_ADMIN_ROUTES = [
+  {
+    id: "A",
+    name: "MRT Serdang Jaya → KLUST",
+    color: "#ef4444",
+    icon: "🚇",
+    fare: 2.5,
+    stops: ["MRT Serdang Jaya", "Seri Kembangan", "Uniten", "KLUST"],
+    durationMin: 20,
+    active: true,
+    schedules: ["14:30", "17:00", "19:30"],
+    vehicle: "BUS-07",
+  },
+  {
+    id: "B",
+    name: "IOI City Mall → KLUST",
+    color: "#f76d0a",
+    icon: "🛍️",
+    fare: 3.0,
+    stops: ["IOI City Mall", "Bandar Baru Bangi", "Kajang Sentral", "KLUST"],
+    durationMin: 23,
+    active: true,
+    schedules: ["08:15", "12:15", "18:00"],
+    vehicle: "BUS-12",
+  },
+  {
+    id: "A2",
+    name: "KLUST → MRT Serdang Jaya",
+    color: "#ef4444",
+    icon: "🚇",
+    fare: 2.5,
+    stops: ["KLUST", "Uniten", "Seri Kembangan", "MRT Serdang Jaya"],
+    durationMin: 20,
+    active: true,
+    schedules: ["09:00", "12:30", "18:00"],
+    vehicle: "BUS-07",
+  },
+  {
+    id: "B2",
+    name: "KLUST → IOI City Mall",
+    color: "#f76d0a",
+    icon: "🛍️",
+    fare: 3.0,
+    stops: ["KLUST", "Kajang Sentral", "Bandar Baru Bangi", "IOI City Mall"],
+    durationMin: 23,
+    active: true,
+    schedules: ["10:00", "14:30", "20:00"],
+    vehicle: "BUS-12",
+  },
+];
+
+window.CS_ADMIN_VEHICLES = [
+  {
+    id: "BUS-07",
+    plate: "WXY 1234",
+    capacity: 20,
+    driver: "Samiul Hasan Tanvir",
+  },
+  { id: "BUS-12", plate: "WXY 5678", capacity: 20, driver: "Yu Jieyao" },
+];
+
+/* Analytics — 7-day window, per-hour passenger counts */
+window.CS_ANALYTICS = {
+  peakHours: [
+    { hour: "07:00", passengers: 12 },
+    { hour: "08:00", passengers: 34 },
+    { hour: "09:00", passengers: 48 },
+    { hour: "10:00", passengers: 22 },
+    { hour: "11:00", passengers: 15 },
+    { hour: "12:00", passengers: 28 },
+    { hour: "13:00", passengers: 33 },
+    { hour: "14:00", passengers: 41 },
+    { hour: "15:00", passengers: 36 },
+    { hour: "16:00", passengers: 29 },
+    { hour: "17:00", passengers: 52 },
+    { hour: "18:00", passengers: 58 },
+    { hour: "19:00", passengers: 44 },
+    { hour: "20:00", passengers: 21 },
+  ],
+  routeLoad: [
+    { routeId: "A", trips: 42, passengers: 528, avgLoad: 0.63 },
+    { routeId: "B", trips: 38, passengers: 471, avgLoad: 0.55 },
+    { routeId: "A2", trips: 35, passengers: 402, avgLoad: 0.51 },
+    { routeId: "B2", trips: 31, passengers: 349, avgLoad: 0.44 },
+  ],
+  congestion: [
+    { segment: "Silk Highway (Seri Kembangan)", delay: 6, level: "medium" },
+    { segment: "Jalan Ikram-Uniten", delay: 2, level: "low" },
+    { segment: "SILK / Kajang Interchange", delay: 9, level: "high" },
+    { segment: "IOI City Mall entrance", delay: 4, level: "medium" },
+  ],
+  kpis: {
+    totalTrips: 146,
+    totalPassengers: 1750,
+    avgLoadFactor: 0.54,
+    onTimePct: 0.87,
+  },
+  dataWindowDays: 7,
+};

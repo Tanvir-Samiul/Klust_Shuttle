@@ -31,11 +31,7 @@
       { href: "trip.html", label: "My Trip", icon: "🚌" },
       { href: "alerts.html", label: "Alert History", icon: "🚨" },
     ],
-    admin: [
-      { href: "routes.html", label: "Routes & Analytics", icon: "🗺️" },
-      { href: "buses.html", label: "Buses", icon: "🚐", disabled: true },
-      { href: "accounts.html", label: "Accounts", icon: "👥", disabled: true },
-    ],
+    admin: [{ href: "routes.html", label: "Routes & Analytics", icon: "🗺️" }],
   };
 
   const NAV = NAV_BY_ROLE[user.role] || [];
