@@ -7,20 +7,20 @@
 const MOCK_USERS = [
   // ---- Students (FR01–FR04) ----
   {
-    id: "253926139",
+    id: "stu1",
     role: "student",
     password: "student123",
-    name: "Ahmed Mohammad Mostakim",
+    name: "Tan.Mos.Min.Yu",
     email: "ahmed@klust.edu.my",
-    wallet: 12.5,
+    wallet: 5,
     loanUsed: 0,
     gender: "M",
   },
   {
-    id: "253926047",
+    id: "253926208",
     role: "student",
     password: "student123",
-    name: "Md Minul Islam",
+    name: "Tanvir Samiul Hasan",
     email: "minul@klust.edu.my",
     wallet: 3.0,
     loanUsed: 0,
@@ -29,10 +29,10 @@ const MOCK_USERS = [
 
   // ---- Drivers (FR05) ----
   {
-    id: "DRV-001",
+    id: "drb1",
     role: "driver",
     password: "driver123",
-    name: "Samiul Hasan Tanvir",
+    name: "Driver Uncle",
     assignedBus: "BUS-07",
     route: "MRT Serdang Jaya → KLUST",
   },
@@ -47,7 +47,7 @@ const MOCK_USERS = [
 
   // ---- Admin ----
   {
-    id: "ADM-001",
+    id: "adm1",
     role: "admin",
     password: "admin123",
     name: "KLUST Transport Office",
