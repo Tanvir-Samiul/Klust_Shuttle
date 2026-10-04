@@ -196,6 +196,36 @@
               </button>
 
               <button
+                data-toggle="${r.id}"
+                style="
+                  padding:10px 18px;
+                  border-radius:12px;
+                  border:1px solid ${
+                    isActive ? "rgba(143,163,191,0.5)" : "rgba(65,238,34,0.5)"
+                  };
+                  background:${
+                    isActive ? "rgba(143,163,191,0.06)" : "rgba(65,238,34,0.08)"
+                  };
+                  color:${isActive ? "#8FA3BF" : "#41ee22"};
+                  font-size:12px;
+                  font-weight:600;
+                  cursor:pointer;
+                  transition:all 0.15s ease;
+                  font-family:inherit;
+                  display:inline-flex;
+                  align-items:center;
+                  gap:6px;
+                "
+                onmouseover="this.style.background='${
+                  isActive ? "rgba(143,163,191,0.15)" : "rgba(65,238,34,0.18)"
+                }'"
+                onmouseout="this.style.background='${
+                  isActive ? "rgba(143,163,191,0.06)" : "rgba(65,238,34,0.08)"
+                }'">
+                ${isActive ? "⏸️ Deactivate" : "▶️ Activate"}
+              </button>
+
+              <button
                 data-delete="${r.id}"
                 style="
                   padding:10px 18px;
@@ -223,11 +253,18 @@
       })
       .join("");
 
-    // Wire edit + delete buttons
+    // Wire edit + toggle + delete buttons
     list
       .querySelectorAll("[data-edit]")
       .forEach((btn) =>
         btn.addEventListener("click", () => openRouteModal(btn.dataset.edit)),
+      );
+    list
+      .querySelectorAll("[data-toggle]")
+      .forEach((btn) =>
+        btn.addEventListener("click", () =>
+          toggleRouteActive(btn.dataset.toggle),
+        ),
       );
     list
       .querySelectorAll("[data-delete]")
@@ -237,6 +274,19 @@
         ),
       );
   }
+
+  /* =========================================================
+     TOGGLE ACTIVE / INACTIVE
+     ========================================================= */
+  function toggleRouteActive(id) {
+    const r = routes.find((x) => x.id === id);
+    if (!r) return;
+    r.active = r.active === false ? true : false;
+    persist();
+    renderRoutes();
+    toast(`Route ${id} ${r.active ? "activated" : "deactivated"}.`);
+  }
+
   /* =========================================================
      ADD / EDIT MODAL
      ========================================================= */
@@ -418,8 +468,8 @@
         Route <span class="font-bold text-cream">${r.id}</span> has
         <span class="font-bold text-cream">${(r.schedules || []).length}</span>
         upcoming trips assigned to it.<br><br>
-        <span class="text-routeA font-semibold">E3 — delete blocked.</span>
-        Deactivate the route or remove its schedules first.
+        <span class="text-routeA font-semibold">E3 — delete blocked.</span><br>
+        Click <span class="font-bold text-cream">⏸️ Deactivate</span> on the route card first, then try deleting again.
       `;
       $("deleteConfirmBtn").disabled = true;
       $("deleteConfirmBtn").classList.add("opacity-40", "cursor-not-allowed");
